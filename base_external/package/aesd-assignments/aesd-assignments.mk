@@ -1,4 +1,4 @@
-
+# Assignment 8 update Claude AI: https://claude.ai/chat/1b5c7fb7-1838-4e1b-83ca-cc9de6c2a845
 ##############################################################
 #
 # AESD-ASSIGNMENTS
@@ -6,7 +6,7 @@
 ##############################################################
 
 #TODO: Fill up the contents below in order to reference your assignment 3 git contents
-AESD_ASSIGNMENTS_VERSION = 2634849ad2ae059fdfb5485ac7eae35ad99083b5
+AESD_ASSIGNMENTS_VERSION = e3589e7b2fd2735d3c809ecaae384c71b2a1bbf6
 # Note: Be sure to reference the *ssh* repository URL here (not https) to work properly
 # with ssh keys and the automated build/test system.
 # Your site should start with git@github.com:
@@ -17,9 +17,13 @@ AESD_ASSIGNMENTS_GIT_SUBMODULES = YES
 define AESD_ASSIGNMENTS_BUILD_CMDS
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/finder-app all
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/server all
+	$(MAKE) -C $(LINUX_DIR) \
+		M=$(@D)/aesd-char-driver \
+		ARCH=$(KERNEL_ARCH) \
+		CROSS_COMPILE=$(TARGET_CROSS) \
+		modules
 endef
 
-# TODO add your writer, finder and finder-test utilities/scripts to the installation steps below
 define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
 	$(INSTALL) -d 0755 $(@D)/conf/ $(TARGET_DIR)/etc/finder-app/conf/
 	$(INSTALL) -m 0755 $(@D)/conf/* $(TARGET_DIR)/etc/finder-app/conf/
@@ -32,7 +36,14 @@ define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
 	
 	$(INSTALL) -d 0755 $(@D)/server/ $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 $(@D)/server/aesdsocket-start-stop $(TARGET_DIR)/etc/init.d/S99aesdsocket
-	
+	$(INSTALL) -m 0755 $(@D)/aesd-char-driver/S97aesdchar $(TARGET_DIR)/etc/init.d/S97aesdchar
+
+	$(MAKE) -C $(LINUX_DIR) \
+		M=$(@D)/aesd-char-driver \
+		ARCH=$(KERNEL_ARCH) \
+		CROSS_COMPILE=$(TARGET_CROSS) \
+		INSTALL_MOD_PATH=$(TARGET_DIR) \
+		modules_install
 endef
 
 $(eval $(generic-package))
