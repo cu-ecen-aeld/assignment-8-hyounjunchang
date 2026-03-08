@@ -6,7 +6,7 @@
 ##############################################################
 
 #TODO: Fill up the contents below in order to reference your assignment 3 git contents
-AESD_ASSIGNMENTS_VERSION = 3e50b03d184b97de125191aea055ff148ce579a6
+AESD_ASSIGNMENTS_VERSION = e3589e7b2fd2735d3c809ecaae384c71b2a1bbf6
 # Note: Be sure to reference the *ssh* repository URL here (not https) to work properly
 # with ssh keys and the automated build/test system.
 # Your site should start with git@github.com:
@@ -17,15 +17,13 @@ AESD_ASSIGNMENTS_GIT_SUBMODULES = YES
 define AESD_ASSIGNMENTS_BUILD_CMDS
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/finder-app all
 	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)/server all
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
-		-C $(LINUX_DIR) \
+	$(MAKE) -C $(LINUX_DIR) \
 		M=$(@D)/aesd-char-driver \
 		ARCH=$(KERNEL_ARCH) \
 		CROSS_COMPILE=$(TARGET_CROSS) \
 		modules
 endef
 
-# TODO add your writer, finder and finder-test utilities/scripts to the installation steps below
 define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
 	$(INSTALL) -d 0755 $(@D)/conf/ $(TARGET_DIR)/etc/finder-app/conf/
 	$(INSTALL) -m 0755 $(@D)/conf/* $(TARGET_DIR)/etc/finder-app/conf/
@@ -38,10 +36,14 @@ define AESD_ASSIGNMENTS_INSTALL_TARGET_CMDS
 	
 	$(INSTALL) -d 0755 $(@D)/server/ $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 $(@D)/server/aesdsocket-start-stop $(TARGET_DIR)/etc/init.d/S99aesdsocket
-
-	$(INSTALL) -m 0755 -d $(TARGET_DIR)/lib/modules/a8
-	$(INSTALL) -m 0755 $(@D)/aesd-char-driver/aesdchar.ko $(TARGET_DIR)/lib/modules/a8
 	$(INSTALL) -m 0755 $(@D)/aesd-char-driver/S97aesdchar $(TARGET_DIR)/etc/init.d/S97aesdchar
+
+	$(MAKE) -C $(LINUX_DIR) \
+		M=$(@D)/aesd-char-driver \
+		ARCH=$(KERNEL_ARCH) \
+		CROSS_COMPILE=$(TARGET_CROSS) \
+		INSTALL_MOD_PATH=$(TARGET_DIR) \
+		modules_install
 endef
 
 $(eval $(generic-package))
